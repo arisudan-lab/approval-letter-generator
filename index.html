@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Farm-Tech India | Approval Letter Generator</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+<style>
+    :root {
+        --primary-color: #0A7F5A;
+        --primary-hover: #086648;
+        --bg-color: #f4f6f9;
+        --text-color: #333;
+        --border-color: #ccc;
+    }
+
+    * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+    }
+
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: var(--bg-color);
+        color: var(--text-color);
+        padding: 20px;
+        line-height: 1.6;
+    }
+
+    .container {
+        max-width: 1200px;
+        margin: auto;
+        display: flex;
+        flex-direction: column; /* Mobile first: stack vertically */
+        gap: 20px;
+    }
+
+    /* Form Styles */
+    .form-box {
+        width: 100%;
+        background: #fff;
+        padding: 25px;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    }
+
+    .form-box h3 {
+        margin-bottom: 20px;
+        color: var(--primary-color);
+        font-size: 1.5rem;
+    }
+
+    .input-group {
+        margin-bottom: 15px;
+    }
+
+    .form-box input, 
+    .form-box textarea {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid var(--border-color);
+        border-radius: 6px;
+        font-size: 1rem;
+        font-family: inherit;
+        transition: border-color 0.3s ease;
+    }
+
+    .form-box input:focus, 
+    .form-box textarea:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 2px rgba(10, 127, 90, 0.2);
+    }
+
+    .form-box textarea {
+        resize: vertical;
+        min-height: 60px;
+    }
+
+    .form-box button {
+        padding: 15px;
+        width: 100%;
+        background: var(--primary-color);
+        color: white;
+        border: none;
+        border-radius: 6px;
+        font-size: 1.1rem;
+        font-weight: bold;
+        cursor: pointer;
+        transition: background 0.3s ease;
+        margin-top: 10px;
+    }
+
+    .form-box button:hover {
+        background: var(--primary-hover);
+    }
+
+    /* Letter Preview Styles */
+    .letter-container {
+        width: 100%;
+        overflow-x: auto; /* Allows scrolling on very small screens */
+    }
+
+    .letter {
+        min-width: 300px; /* Ensure it doesn't squish too much on phones */
+        background: white;
+        padding: 40px;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        font-family: Arial, sans-serif; /* Keep standard font for PDF */
+        color: #000;
+    }
+
+    /* Header for Logo and Date */
+    .letter-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 40px;
+    }
+
+    .letter-logo {
+        max-width: 120px;
+        height: auto;
+    }
+
+    .letter-date {
+        text-align: right;
+        font-weight: bold;
+    }
+
+    .letter p {
+        margin-bottom: 15px;
+    }
+
+    .letter ul {
+        margin-bottom: 15px;
+        padding-left: 20px;
+    }
+
+    .signature-block {
+        margin-top: 40px;
+    }
+
+    .signature-block p {
+        margin-bottom: 5px;
+    }
+
+    /* Desktop Layout */
+    @media (min-width: 992px) {
+        .container {
+            flex-direction: row;
+            padding: 40px 0;
+        }
+        .form-box {
+            width: 35%;
+            position: sticky;
+            top: 20px;
+            height: fit-content;
+        }
+        .letter-container {
+            width: 65%;
+        }
+        .letter {
+            padding: 60px;
+        }
+    }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+    <div class="form-box">
+        <h3>Enter Details</h3>
+        
+        <div class="input-group">
+            <input type="text" id="employeeName" placeholder="Employee Name">
+        </div>
+        <div class="input-group">
+            <input type="text" id="jobRole" placeholder="Job Role">
+        </div>
+        <div class="input-group">
+            <input type="date" id="joiningDate">
+        </div>
+        <div class="input-group">
+            <input type="text" id="managerName" placeholder="Reporting Manager / Department">
+        </div>
+        <div class="input-group">
+            <textarea id="resp1" placeholder="Responsibility 1"></textarea>
+        </div>
+        <div class="input-group">
+            <textarea id="resp2" placeholder="Responsibility 2"></textarea>
+        </div>
+        <div class="input-group">
+            <textarea id="resp3" placeholder="Responsibility 3"></textarea>
+        </div>
+        <div class="input-group">
+            <input type="text" id="founderName" placeholder="Founder Name">
+        </div>
+        <div class="input-group">
+            <input type="text" id="contactDetails" placeholder="Company Contact Details">
+        </div>
+        
+        <button onclick="generatePDF()">Download PDF</button>
+    </div>
+
+    <div class="letter-container">
+        <div class="letter" id="letterContent">
+            
+            <div class="letter-header">
+                <img src="f.png" alt="Farm-Tech India Logo" class="letter-logo">
+                <p class="letter-date">Date: <span id="currentDate"></span></p>
+            </div>
+
+            <p>Dear <b id="outEmployeeName">[Employee Name]</b>,</p>
+
+            <p>
+                We are pleased to formally welcome you to <b>Farm-Tech India</b> 
+                as a <b id="outJobRole">[Job Role]</b>. 
+                After reviewing your profile and discussions during the selection process,
+                we officially approve your appointment.
+            </p>
+
+            <p>
+                Your date of joining will be 
+                <b id="outJoiningDate">[Joining Date]</b>, and you will be working under 
+                <b id="outManagerName">[Reporting Manager]</b>.
+            </p>
+
+            <p>Your key responsibilities will include:</p>
+            <ul>
+                <li id="outResp1">[Responsibility 1]</li>
+                <li id="outResp2">[Responsibility 2]</li>
+                <li id="outResp3">[Responsibility 3]</li>
+            </ul>
+
+            <p>
+                Your compensation and other employment terms are as mutually agreed.
+                Detailed company policies regarding confidentiality and conduct will be shared separately.
+            </p>
+
+            <p>
+                We believe in innovation, ownership, and sustainable growth. 
+                Your contribution will play a significant role in shaping Farm-Tech India.
+            </p>
+
+            <p>
+                We look forward to building impactful solutions together.
+            </p>
+
+            <div class="signature-block">
+                <p>Best Regards,</p>
+                <br>
+                <p><b id="outFounderName">Arisudan Pradhan</b></p>
+                <p>Founder</p>
+                <p>Farm-Tech India</p>
+                <p id="outContactDetails">[Contact Details]</p>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+// Auto date formatting (e.g., February 24, 2026)
+const dateOptions = { year: 'numeric', month: 'long', day: 'numeric' };
+document.getElementById("currentDate").innerText = new Date().toLocaleDateString('en-US', dateOptions);
+
+// Live autofill array (added founderName)
+const inputs = [
+    "employeeName", "jobRole", "joiningDate", "managerName", 
+    "resp1", "resp2", "resp3", "founderName", "contactDetails"
+];
+
+// Map input values to output spans
+inputs.forEach(id => {
+    document.getElementById(id).addEventListener("input", function(){
+        // Ensure the output ID matches the format (e.g., "founderName" -> "outFounderName")
+        const outputId = "out" + id.charAt(0).toUpperCase() + id.slice(1);
+        const outputElement = document.getElementById(outputId);
+        
+        if(outputElement) {
+            outputElement.innerText = this.value || `[${id.replace(/([A-Z])/g, ' $1').trim()}]`; // Fallback text if empty
+        }
+    });
+});
+
+// PDF generator with specific settings for better A4 output
+function generatePDF(){
+    const element = document.getElementById("letterContent");
+    const opt = {
+        margin:       0.5,
+        filename:     'Farm-Tech-India-Approval-Letter.pdf',
+        image:        { type: 'jpeg', quality: 0.98 },
+        html2canvas:  { scale: 2, useCORS: true },
+        jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
+    };
+
+    html2pdf().set(opt).from(element).save();
+}
+</script>
+
+</body>
+</html>
