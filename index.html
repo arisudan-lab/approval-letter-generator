@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Farm-Tech India | Approval Letter Generator</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
 <style>
     :root {
@@ -33,11 +32,10 @@
         max-width: 1200px;
         margin: auto;
         display: flex;
-        flex-direction: column; /* Mobile first: stack vertically */
+        flex-direction: column;
         gap: 20px;
     }
 
-    /* Form Styles */
     .form-box {
         width: 100%;
         background: #fff;
@@ -54,6 +52,14 @@
 
     .input-group {
         margin-bottom: 15px;
+    }
+
+    .input-group label {
+        display: block;
+        margin-bottom: 4px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: #555;
     }
 
     .form-box input, 
@@ -97,28 +103,31 @@
         background: var(--primary-hover);
     }
 
-    /* Letter Preview Styles */
+    .form-box button:disabled {
+        background: #999;
+        cursor: not-allowed;
+    }
+
     .letter-container {
         width: 100%;
-        overflow-x: auto; /* Allows scrolling on very small screens */
+        overflow-x: auto;
     }
 
     .letter {
-        min-width: 300px; /* Ensure it doesn't squish too much on phones */
+        min-width: 300px;
         background: white;
         padding: 40px;
         border-radius: 12px;
         box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-        font-family: Arial, sans-serif; /* Keep standard font for PDF */
+        font-family: Arial, sans-serif;
         color: #000;
     }
 
-    /* Header for Logo and Date */
     .letter-header {
         display: flex;
         justify-content: space-between;
         align-items: flex-start;
-        margin-bottom: 40px;
+        margin-bottom: 30px;
     }
 
     .letter-logo {
@@ -132,23 +141,31 @@
     }
 
     .letter p {
-        margin-bottom: 15px;
+        margin-bottom: 12px;
+        font-size: 14px;
     }
 
     .letter ul {
-        margin-bottom: 15px;
+        margin-bottom: 12px;
         padding-left: 20px;
+        font-size: 14px;
     }
 
     .signature-block {
-        margin-top: 40px;
+        margin-top: 30px;
     }
 
     .signature-block p {
-        margin-bottom: 5px;
+        margin-bottom: 4px;
     }
 
-    /* Desktop Layout */
+    #statusMsg {
+        text-align: center;
+        margin-top: 8px;
+        font-size: 0.9rem;
+        min-height: 1.4em;
+    }
+
     @media (min-width: 992px) {
         .container {
             flex-direction: row;
@@ -177,41 +194,52 @@
         <h3>Enter Details</h3>
         
         <div class="input-group">
-            <input type="text" id="employeeName" placeholder="Employee Name">
+            <label for="employeeName">Employee Name</label>
+            <input type="text" id="employeeName" placeholder="e.g. Rahul Sharma">
         </div>
         <div class="input-group">
-            <input type="text" id="jobRole" placeholder="Job Role">
+            <label for="jobRole">Job Role</label>
+            <input type="text" id="jobRole" placeholder="e.g. Frontend Developer">
         </div>
         <div class="input-group">
+            <label for="joiningDate">Joining Date</label>
             <input type="date" id="joiningDate">
         </div>
         <div class="input-group">
-            <input type="text" id="managerName" placeholder="Reporting Manager / Department">
+            <label for="managerName">Reporting Manager / Department</label>
+            <input type="text" id="managerName" placeholder="e.g. Tech Division">
         </div>
         <div class="input-group">
-            <textarea id="resp1" placeholder="Responsibility 1"></textarea>
+            <label for="resp1">Responsibility 1</label>
+            <textarea id="resp1" placeholder="e.g. Develop and maintain web applications"></textarea>
         </div>
         <div class="input-group">
-            <textarea id="resp2" placeholder="Responsibility 2"></textarea>
+            <label for="resp2">Responsibility 2</label>
+            <textarea id="resp2" placeholder="e.g. Collaborate with cross-functional teams"></textarea>
         </div>
         <div class="input-group">
-            <textarea id="resp3" placeholder="Responsibility 3"></textarea>
+            <label for="resp3">Responsibility 3</label>
+            <textarea id="resp3" placeholder="e.g. Participate in code reviews"></textarea>
         </div>
         <div class="input-group">
-            <input type="text" id="founderName" placeholder="Founder Name">
+            <label for="founderName">Founder Name</label>
+            <input type="text" id="founderName" placeholder="e.g. Arisudan Pradhan">
         </div>
         <div class="input-group">
-            <input type="text" id="contactDetails" placeholder="Company Contact Details">
+            <label for="contactDetails">Company Contact Details</label>
+            <input type="text" id="contactDetails" placeholder="e.g. info@farmtechindia.com | +91-XXXXXXXXXX">
         </div>
         
-        <button onclick="generatePDF()">Download PDF</button>
+        <button id="downloadBtn" onclick="generatePDF()">Download PDF</button>
+        <p id="statusMsg"></p>
     </div>
 
     <div class="letter-container">
         <div class="letter" id="letterContent">
             
             <div class="letter-header">
-                <img src="f.png" alt="Farm-Tech India Logo" class="letter-logo">
+                <img src="f.png" alt="Farm-Tech India Logo" class="letter-logo"
+                     onerror="this.style.display='none'">
                 <p class="letter-date">Date: <span id="currentDate"></span></p>
             </div>
 
@@ -254,7 +282,7 @@
             <div class="signature-block">
                 <p>Best Regards,</p>
                 <br>
-                <p><b id="outFounderName">Arisudan Pradhan</b></p>
+                <p><b id="outFounderName">[Founder Name]</b></p>
                 <p>Founder</p>
                 <p>Farm-Tech India</p>
                 <p id="outContactDetails">[Contact Details]</p>
@@ -264,42 +292,108 @@
 
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"
+        integrity="sha512-GsLlZN/3F2ErC5ifS5QtgpiJtWd43JWSuIgh7mbzZ8zBps+dvLusV+eNQATqgA/HdeKFVgA5v3S/cIrLF7QnIg=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
 <script>
-// Auto date formatting (e.g., February 24, 2026)
-const dateOptions = { year: 'numeric', month: 'long', day: 'numeric' };
-document.getElementById("currentDate").innerText = new Date().toLocaleDateString('en-US', dateOptions);
+var dateOptions = { year: 'numeric', month: 'long', day: 'numeric' };
+document.getElementById("currentDate").innerText =
+    new Date().toLocaleDateString('en-US', dateOptions);
 
-// Live autofill array (added founderName)
-const inputs = [
-    "employeeName", "jobRole", "joiningDate", "managerName", 
-    "resp1", "resp2", "resp3", "founderName", "contactDetails"
-];
+var placeholderMap = {
+    employeeName:   "Employee Name",
+    jobRole:        "Job Role",
+    joiningDate:    "Joining Date",
+    managerName:    "Reporting Manager",
+    resp1:          "Responsibility 1",
+    resp2:          "Responsibility 2",
+    resp3:          "Responsibility 3",
+    founderName:    "Founder Name",
+    contactDetails: "Contact Details"
+};
 
-// Map input values to output spans
-inputs.forEach(id => {
-    document.getElementById(id).addEventListener("input", function(){
-        // Ensure the output ID matches the format (e.g., "founderName" -> "outFounderName")
-        const outputId = "out" + id.charAt(0).toUpperCase() + id.slice(1);
-        const outputElement = document.getElementById(outputId);
-        
-        if(outputElement) {
-            outputElement.innerText = this.value || `[${id.replace(/([A-Z])/g, ' $1').trim()}]`; // Fallback text if empty
-        }
+function formatDate(dateStr) {
+    if (!dateStr) return "";
+    var parts = dateStr.split("-");
+    var d = new Date(parts[0], parts[1] - 1, parts[2]);
+    return d.toLocaleDateString('en-US', dateOptions);
+}
+
+Object.keys(placeholderMap).forEach(function(id) {
+    var inputEl  = document.getElementById(id);
+    var outputId = "out" + id.charAt(0).toUpperCase() + id.slice(1);
+    var outputEl = document.getElementById(outputId);
+    if (!inputEl || !outputEl) return;
+
+    inputEl.addEventListener("input", function() {
+        var value = this.value.trim();
+        if (id === "joiningDate") value = formatDate(this.value);
+        outputEl.innerText = value || "[" + placeholderMap[id] + "]";
     });
 });
 
-// PDF generator with specific settings for better A4 output
-function generatePDF(){
-    const element = document.getElementById("letterContent");
-    const opt = {
-        margin:       0.5,
+function generatePDF() {
+    if (typeof html2pdf === "undefined") {
+        alert("PDF library failed to load. Check your internet connection and refresh.");
+        return;
+    }
+
+    var btn = document.getElementById("downloadBtn");
+    var msg = document.getElementById("statusMsg");
+    var element = document.getElementById("letterContent");
+
+    btn.disabled = true;
+    btn.innerText = "Generating…";
+    msg.style.color = "#555";
+    msg.innerText = "Preparing your PDF…";
+
+    // ============================================================
+    // KEY FIX: Force the letter to a fixed A4-friendly width
+    // before html2canvas captures it, then restore after.
+    // This prevents the huge blank space & content cutoff.
+    // ============================================================
+    var originalStyle = element.getAttribute("style") || "";
+
+    element.style.width        = "210mm";   // A4 width
+    element.style.maxWidth     = "210mm";
+    element.style.padding      = "20mm";    // Standard letter margins
+    element.style.boxShadow    = "none";
+    element.style.borderRadius = "0";
+
+    var opt = {
+        margin:       0,               // We handle margins via padding above
         filename:     'Farm-Tech-India-Approval-Letter.pdf',
         image:        { type: 'jpeg', quality: 0.98 },
-        html2canvas:  { scale: 2, useCORS: true },
-        jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
+        html2canvas:  {
+            scale: 2,
+            useCORS: true,
+            allowTaint: true,
+            logging: false,
+            width: element.scrollWidth,     // Capture exactly what's rendered
+            height: element.scrollHeight,
+            windowWidth: element.scrollWidth
+        },
+        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' },
+        pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] }
     };
 
-    html2pdf().set(opt).from(element).save();
+    html2pdf().set(opt).from(element).save()
+        .then(function() {
+            msg.style.color = "green";
+            msg.innerText = "✅ PDF downloaded!";
+        })
+        .catch(function(err) {
+            console.error("PDF generation error:", err);
+            msg.style.color = "red";
+            msg.innerText = "❌ Error: " + err.message;
+        })
+        .finally(function() {
+            // Restore original styles so the page looks normal again
+            element.setAttribute("style", originalStyle);
+            btn.disabled = false;
+            btn.innerText = "Download PDF";
+        });
 }
 </script>
 
